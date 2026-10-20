@@ -25,6 +25,17 @@ npm run db:seed -- --owner you@example.com [--visibility private] [seed/italian-
 
 E2E builds and previews the app on port 4173 against a throwaway `e2e.db` (env set in `playwright.config.ts`); it never touches `.env`'s database. CI (`.github/workflows/ci.yml`, on pushes to `master` and PRs) runs lint, check, unit and E2E.
 
+E2E tests live in `e2e/`, one file per area (auth, sets, study, explore). Shared helpers are in `e2e/helpers.ts`:
+
+- **Setup:** `signUp`, `createSet`.
+- **Answering questions:** `answerCorrectly` / `answerWrongly` answer any Learn, Write or Test question from a prompt → answer map.
+- **State the UI can't create:** `e2eDb()` writes it directly, e.g. making cards due.
+
+Two pitfalls:
+
+- **Study pages render in the browser** (`ssr = false`). Wait for their content before pressing keyboard shortcuts.
+- **Their HTTP status is always 200**, even when the set is missing. The 404 is inside the `__data.json` response.
+
 ### Seeing a change in the running app
 
 Use the sandbox, not `npm run dev`, so test data never lands in `local.db`:

@@ -76,7 +76,13 @@
 		{#if isSignup}
 			<label class="block">
 				<span class="label">Name</span>
-				<input class="input" name="name" autocomplete="name" required value={form?.name ?? ''} />
+				<input
+					class="input"
+					name="name"
+					autocomplete="name"
+					required
+					defaultValue={form?.name ?? ''}
+				/>
 			</label>
 		{/if}
 		<label class="block">
@@ -87,7 +93,7 @@
 				name="email"
 				autocomplete="email"
 				required
-				value={form?.email ?? ''}
+				defaultValue={form?.email ?? ''}
 			/>
 		</label>
 		<label class="block">

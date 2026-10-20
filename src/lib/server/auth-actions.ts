@@ -8,13 +8,21 @@ export function safeNext(url: URL) {
 	return next.startsWith('/') && !next.startsWith('//') ? next : '/';
 }
 
-async function run(action: () => Promise<unknown>, fallback: string) {
+/**
+ * Runs a Better Auth call. On failure returns `fail()` with a message, plus `keep` (form values
+ * to show again). It must stay a real `fail()` result: a copy of it would count as a success.
+ */
+async function run(
+	action: () => Promise<unknown>,
+	fallback: string,
+	keep: Record<string, string> = {}
+) {
 	try {
 		await action();
 	} catch (e) {
-		if (e instanceof APIError) return fail(400, { message: e.message || fallback });
+		if (e instanceof APIError) return fail(400, { message: e.message || fallback, ...keep });
 		console.error(e);
-		return fail(500, { message: 'Something went wrong, please try again.' });
+		return fail(500, { message: 'Something went wrong, please try again.', ...keep });
 	}
 }
 
@@ -24,9 +32,10 @@ export async function signInEmail(event: RequestEvent) {
 	const password = String(form.get('password') ?? '');
 	const failure = await run(
 		() => auth.api.signInEmail({ body: { email, password } }),
-		'Sign in failed'
+		'Sign in failed',
+		{ email }
 	);
-	if (failure) return { ...failure, data: { ...failure.data, email } };
+	if (failure) return failure;
 	redirect(303, safeNext(event.url));
 }
 
@@ -38,9 +47,10 @@ export async function signUpEmail(event: RequestEvent) {
 	if (!name) return fail(400, { message: 'Please enter your name.', name, email });
 	const failure = await run(
 		() => auth.api.signUpEmail({ body: { name, email, password } }),
-		'Sign up failed'
+		'Sign up failed',
+		{ name, email }
 	);
-	if (failure) return { ...failure, data: { ...failure.data, name, email } };
+	if (failure) return failure;
 	redirect(303, safeNext(event.url));
 }
 

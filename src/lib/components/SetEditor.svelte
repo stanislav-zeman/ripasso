@@ -263,6 +263,7 @@
 						type="button"
 						class="btn-ghost px-2"
 						title="Move up"
+						aria-label="Move card {i + 1} up"
 						disabled={i === 0}
 						onclick={() => move(i, -1)}>↑</button
 					>
@@ -270,6 +271,7 @@
 						type="button"
 						class="btn-ghost px-2"
 						title="Move down"
+						aria-label="Move card {i + 1} down"
 						disabled={i === cards.length - 1}
 						onclick={() => move(i, 1)}>↓</button
 					>
@@ -277,6 +279,7 @@
 						type="button"
 						class="btn-ghost px-2 hover:text-bad"
 						title="Delete card"
+						aria-label="Delete card {i + 1}"
 						onclick={() => cards.splice(i, 1)}>✕</button
 					>
 				</div>
