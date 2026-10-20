@@ -34,7 +34,12 @@ npm run dev
 
 ## Ready-made word sets
 
-`seed/` contains word sets you can load into any database. `seed/italian-b1/` has eight Italian B1 sets (work, feelings, useful verbs, connectors, environment and society, health, media, idioms), about 220 cards.
+`seed/` contains word sets you can load into any database:
+
+- `seed/italian-a2/`: nine Italian A2 sets (daily routine, home, food and restaurants, shopping and clothes, travel, in town, free time, describing people, weather), about 250 cards.
+- `seed/italian-b1/`: eight Italian B1 sets (work, feelings, useful verbs, connectors, environment and society, health, media, idioms), about 220 cards.
+
+By default the command loads every folder; pass folders to load only those, e.g. `npm run db:seed -- --owner you@example.com seed/italian-a2`.
 
 ```sh
 npm run db:seed -- --owner you@example.com                        # local database (.env)
