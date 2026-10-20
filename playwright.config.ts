@@ -14,7 +14,10 @@ export default defineConfig({
 		env,
 		timeout: 180_000
 	},
-	use: { baseURL: env.ORIGIN },
+	forbidOnly: !!process.env.CI,
+	retries: process.env.CI ? 1 : 0,
+	reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
+	use: { baseURL: env.ORIGIN, trace: 'retain-on-failure' },
 	testDir: 'e2e',
 	testMatch: '**/*.e2e.{ts,js}'
 });
