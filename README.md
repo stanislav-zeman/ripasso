@@ -21,15 +21,28 @@ npm run db:migrate            # creates local.db
 npm run dev
 ```
 
-| Command                          | What it does                                                   |
-| -------------------------------- | -------------------------------------------------------------- |
-| `npm run dev`                    | Dev server on http://localhost:5173                            |
-| `npm run check` / `npm run lint` | Type check / Prettier + ESLint                                 |
-| `npm run test:unit`              | Vitest (parser, grader, scheduler, learn queue)                |
-| `npm run test:e2e`               | Playwright against a throwaway `e2e.db`                        |
-| `npm run db:generate`            | Create a migration after editing `src/lib/server/db/schema.ts` |
-| `npm run db:migrate`             | Apply migrations to the database in `DATABASE_URL`             |
-| `npm run db:studio`              | Browse the database                                            |
+| Command                              | What it does                                                   |
+| ------------------------------------ | -------------------------------------------------------------- |
+| `npm run dev`                        | Dev server on http://localhost:5173                            |
+| `npm run check` / `npm run lint`     | Type check / Prettier + ESLint                                 |
+| `npm run test:unit`                  | Vitest (parser, grader, scheduler, learn queue)                |
+| `npm run test:e2e`                   | Playwright against a throwaway `e2e.db`                        |
+| `npm run db:generate`                | Create a migration after editing `src/lib/server/db/schema.ts` |
+| `npm run db:migrate`                 | Apply migrations to the database in `DATABASE_URL`             |
+| `npm run db:studio`                  | Browse the database                                            |
+| `npm run db:seed -- --owner <email>` | Load the ready-made word sets from `seed/` (see below)         |
+
+## Ready-made word sets
+
+`seed/` contains word sets you can load into any database. `seed/italian-b1/` has eight Italian B1 sets (work, feelings, useful verbs, connectors, environment and society, health, media, idioms), about 220 cards.
+
+```sh
+npm run db:seed -- --owner you@example.com                        # local database (.env)
+npm run db:seed -- --owner you@example.com --visibility private   # only visible to you
+DATABASE_URL=libsql://… DATABASE_AUTH_TOKEN=… npm run db:seed -- --owner you@example.com   # production
+```
+
+The owner must already have an account (sign up in the app first). Sets are public by default, so they show up in Explore. Running the command again skips sets the owner already has. Each file is a plain TSV (`term<TAB>definition`, with `# title:`, `# language:`, `# translated:` and optional `# level:` headers), so it can also be pasted into the app's import box. Text in parentheses, like `(m.)` or `(di)`, is shown as a hint and is optional when typing answers.
 
 ## Deploying (Vercel + Turso)
 

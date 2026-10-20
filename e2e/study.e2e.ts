@@ -84,12 +84,13 @@ test('create a set, study it, and keep it private from others', async ({ page })
 	expect(edit?.status()).toBe(404);
 });
 
-test('explore public sets by language', async ({ page }) => {
+test('explore public sets by language and level', async ({ page }) => {
 	await signUp(page, 'Clara');
 	const title = `Tiere ${Date.now()}`;
 	await page.goto('/sets/new');
 	await page.getByLabel('Title').fill(title);
 	await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('de');
+	await page.getByRole('combobox', { name: 'Level (optional)' }).selectOption('B2');
 	await page.getByLabel('Visibility').selectOption('public');
 	await page.getByPlaceholder(/el perro/).fill('der Hund\tthe dog\ndie Katze\tthe cat');
 	await page.getByRole('button', { name: 'Create set' }).click();
@@ -100,8 +101,16 @@ test('explore public sets by language', async ({ page }) => {
 	await expect(page).toHaveURL(/lang=de/);
 	await expect(page.getByRole('link', { name: new RegExp(title) })).toBeVisible();
 	await expect(page.getByRole('link', { name: new RegExp(title) })).toContainText('German');
+	await expect(page.getByRole('link', { name: new RegExp(title) })).toContainText('B2');
 
-	// Another language doesn't list it.
+	// The level filter combines with the language filter.
+	await page.getByRole('combobox', { name: 'Level' }).selectOption('B2');
+	await expect(page).toHaveURL(/lang=de.*level=B2/);
+	await expect(page.getByRole('link', { name: new RegExp(title) })).toBeVisible();
+
+	// Another language or level doesn't list it.
 	await page.goto('/explore?lang=es');
 	await expect(page.getByText('No public sets in Spanish.')).toBeVisible();
+	await page.goto('/explore?lang=de&level=A1');
+	await expect(page.getByText('No public sets in German at A1.')).toBeVisible();
 });

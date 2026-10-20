@@ -24,6 +24,13 @@ describe('grade', () => {
 		expect(grade('casa', 'la casa', { lang: 'it', ignoreArticles: false })).toBe('wrong');
 	});
 
+	it('treats parenthesised hints as optional', () => {
+		expect(grade('ambiente', "l'ambiente (m.)", { lang: 'it' })).toBe('correct');
+		expect(grade("l'ambiente (m.)", "l'ambiente (m.)", { lang: 'it' })).toBe('correct');
+		expect(grade('fidarsi', 'fidarsi (di)', { lang: 'it' })).toBe('correct');
+		expect(grade('although', 'although (+ subjunctive; formal)')).toBe('correct');
+	});
+
 	it('accepts any of several alternatives', () => {
 		expect(grade('to dine', 'to eat; to dine')).toBe('correct');
 		expect(grade('almorzar', 'comer / almorzar')).toBe('correct');

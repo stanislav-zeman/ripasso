@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { user } from './auth.schema';
+import { LEVELS } from '../../levels';
 
 export * from './auth.schema';
 
@@ -24,6 +25,8 @@ export const studySet = sqliteTable(
 		termLang: text('term_lang').notNull().default('it'),
 		/** The language definitions (translations) are written in. */
 		defLang: text('def_lang').notNull().default('en'),
+		/** Optional CEFR level (A1–C2). */
+		level: text('level', { enum: LEVELS }),
 		visibility: text('visibility', { enum: VISIBILITIES }).notNull().default('private'),
 		createdAt: integer('created_at', { mode: 'timestamp_ms' }).default(now).notNull(),
 		updatedAt: integer('updated_at', { mode: 'timestamp_ms' })

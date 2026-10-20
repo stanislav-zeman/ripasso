@@ -34,7 +34,11 @@
 	const q = $derived(current && sides(current.card, current.card, prefs.answerWith));
 	const options = $derived.by(() => {
 		if (!current || current.stage !== 'choice') return [];
-		const others = [...cards, ...pool].map((c) => sides(c, c, prefs.answerWith).answer);
+		// Cards with the same prompt (synonyms) would also be right, so they can't be distractors.
+		const others = [...cards, ...pool]
+			.map((c) => sides(c, c, prefs.answerWith))
+			.filter((o) => o.prompt !== q!.prompt)
+			.map((o) => o.answer);
 		return choices(q!.answer, others);
 	});
 

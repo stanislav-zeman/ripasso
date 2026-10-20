@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { VISIBILITIES, type Visibility } from '#lib/server/db/schema.ts';
 import { MAX_CARDS } from '#lib/parse.ts';
 import { isLanguage } from '#lib/languages.ts';
+import { isLevel } from '#lib/levels.ts';
 import type { CardInput, SetInput } from '#lib/server/sets.ts';
 
 /** Reads and validates the set editor form. Cards arrive as a JSON field. */
@@ -15,6 +16,7 @@ export async function readSetForm(request: Request) {
 		.slice(0, 2000);
 	const termLang = String(form.get('termLang') ?? '');
 	const defLang = String(form.get('defLang') ?? '');
+	const level = String(form.get('level') ?? '');
 	const visibility = String(form.get('visibility') ?? 'private') as Visibility;
 
 	let cards: CardInput[] = [];
@@ -45,7 +47,7 @@ export async function readSetForm(request: Request) {
 			})
 		};
 	}
-	if (!VISIBILITIES.includes(visibility)) {
+	if ((level && !isLevel(level)) || !VISIBILITIES.includes(visibility)) {
 		return { error: fail(400, { message: 'Invalid set settings.' }) };
 	}
 	if (cards.length === 0) return { error: fail(400, { message: 'Add at least one card.' }) };
@@ -53,6 +55,13 @@ export async function readSetForm(request: Request) {
 		return { error: fail(400, { message: `A set can have at most ${MAX_CARDS} cards.` }) };
 	}
 
-	const input: SetInput = { title, description, termLang, defLang, visibility };
+	const input: SetInput = {
+		title,
+		description,
+		termLang,
+		defLang,
+		level: isLevel(level) ? level : null,
+		visibility
+	};
 	return { input, cards };
 }

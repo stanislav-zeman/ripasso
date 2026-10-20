@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { isLanguage, LANGUAGES, languageName } from '#lib/languages.ts';
+	import { LEVELS, levelLabel } from '#lib/levels.ts';
 	import { MAX_CARDS, parseCards, SEPARATORS, type Separator } from '#lib/parse.ts';
 
 	interface EditorCard {
@@ -17,6 +18,7 @@
 			description: string;
 			termLang: string;
 			defLang: string;
+			level: string | null;
 			visibility: string;
 			cards: { id: string; term: string; definition: string }[];
 		};
@@ -36,6 +38,7 @@
 	// New sets start without a term language, so it's chosen deliberately (then remembered).
 	let termLang = $state(seed?.termLang ?? '');
 	let defLang = $state(seed?.defLang ?? 'en');
+	let level = $state(seed?.level ?? '');
 	let visibility = $state(seed?.visibility ?? 'private');
 	let cards = $state<EditorCard[]>(seed?.cards.map((c) => ({ key: c.id, ...c })) ?? []);
 
@@ -137,7 +140,7 @@
 			<textarea class="input" name="description" rows="2" bind:value={description} maxlength="2000"
 			></textarea>
 		</label>
-		<div class="grid gap-4 sm:grid-cols-3">
+		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 			<label class="block">
 				<span class="label">Language</span>
 				<select class="input" name="termLang" bind:value={termLang} required>
@@ -153,6 +156,13 @@
 					{#each Object.entries(LANGUAGES) as [code, lang] (code)}<option value={code}
 							>{lang.flag} {lang.name}</option
 						>{/each}
+				</select>
+			</label>
+			<label class="block">
+				<span class="label">Level <span class="font-normal text-muted">(optional)</span></span>
+				<select class="input" name="level" bind:value={level}>
+					<option value="">No level</option>
+					{#each LEVELS as l (l)}<option value={l}>{levelLabel(l)}</option>{/each}
 				</select>
 			</label>
 			<label class="block">

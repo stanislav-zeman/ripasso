@@ -31,7 +31,7 @@
 	function start() {
 		const pool =
 			prefs.starredOnly && starredCount ? data.cards.filter((c) => c.starred) : data.cards;
-		const answers = data.cards.map((c) => sides(c, data.set, prefs.answerWith).answer);
+		const all = data.cards.map((c) => sides(c, data.set, prefs.answerWith));
 		questions = shuffle(pool)
 			.slice(0, length || undefined)
 			.map((c) => {
@@ -41,7 +41,11 @@
 					prompt: s.prompt,
 					promptLang: s.promptLang,
 					answer: s.answer,
-					options: choices(s.answer, answers)
+					// Cards with the same prompt (synonyms) would also be right, so they can't be distractors.
+					options: choices(
+						s.answer,
+						all.filter((o) => o.prompt !== s.prompt).map((o) => o.answer)
+					)
 				};
 			});
 		index = 0;

@@ -30,6 +30,8 @@ function articlePattern(lang: string | undefined) {
 function normalize(text: string, { lang, ignoreArticles = true }: GradeOptions) {
 	let s = text
 		.normalize('NFC')
+		// Parenthesised hints such as "(m.)" or "(di)" are optional when answering.
+		.replace(/\([^)]*\)/g, ' ')
 		.toLowerCase()
 		.replace(/[’`´]/g, "'")
 		.replace(/[.,!?¿¡;:"]/g, '')
@@ -46,7 +48,11 @@ function stripAccents(text: string) {
 
 /** Splits an expected answer like "to eat; to dine" or "comer / almorzar" into alternatives. */
 function alternatives(expected: string) {
-	const parts = expected.split(/\s*[;/]\s*|\s*,\s+/).filter(Boolean);
+	// Separators inside a hint, like "(+ subjunctive; formal)", don't start a new alternative.
+	const parts = expected
+		.replace(/\([^)]*\)/g, ' ')
+		.split(/\s*[;/]\s*|\s*,\s+/)
+		.filter(Boolean);
 	return [expected, ...parts];
 }
 

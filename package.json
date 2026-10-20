@@ -19,7 +19,8 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
-		"vercel-build": "drizzle-kit migrate && vite build"
+		"vercel-build": "drizzle-kit migrate && vite build",
+		"db:seed": "node scripts/seed.js"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

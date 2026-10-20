@@ -6,6 +6,7 @@ import {
 	desc,
 	eq,
 	inArray,
+	isNotNull,
 	like,
 	lte,
 	ne,
@@ -23,6 +24,7 @@ import {
 	type Visibility
 } from '#lib/server/db/schema.ts';
 import { MAX_CARDS, type ParsedCard } from '#lib/parse.ts';
+import type { Level } from '#lib/levels.ts';
 
 export interface CardInput extends ParsedCard {
 	id?: string;
@@ -33,6 +35,7 @@ export interface SetInput {
 	description: string;
 	termLang: string;
 	defLang: string;
+	level: Level | null;
 	visibility: Visibility;
 }
 
@@ -109,6 +112,7 @@ export async function listLibrary(userId: string) {
 			id: studySet.id,
 			title: studySet.title,
 			termLang: studySet.termLang,
+			level: studySet.level,
 			description: studySet.description,
 			visibility: studySet.visibility,
 			ownerId: studySet.ownerId,
@@ -130,13 +134,23 @@ export async function listLibrary(userId: string) {
 		.orderBy(desc(studySet.updatedAt));
 }
 
-export async function listPublicSets(query: string, lang = '', limit = 50) {
+export interface PublicFilters {
+	lang?: string;
+	level?: Level;
+}
+
+export async function listPublicSets(
+	query: string,
+	{ lang, level }: PublicFilters = {},
+	limit = 50
+) {
 	const q = `%${query.trim().replace(/[%_]/g, '')}%`;
 	return db
 		.select({
 			id: studySet.id,
 			title: studySet.title,
 			termLang: studySet.termLang,
+			level: studySet.level,
 			description: studySet.description,
 			ownerName: user.name,
 			updatedAt: studySet.updatedAt,
@@ -149,6 +163,7 @@ export async function listPublicSets(query: string, lang = '', limit = 50) {
 			and(
 				eq(studySet.visibility, 'public'),
 				lang ? eq(studySet.termLang, lang) : undefined,
+				level ? eq(studySet.level, level) : undefined,
 				query.trim() ? or(like(studySet.title, q), like(studySet.description, q)) : undefined
 			)
 		)
@@ -156,14 +171,30 @@ export async function listPublicSets(query: string, lang = '', limit = 50) {
 		.limit(limit);
 }
 
-/** Languages that have public sets, most sets first. */
-export async function listPublicLanguages() {
+/** Languages that have public sets (at `level`, if given), most sets first. */
+export async function listPublicLanguages(level?: Level) {
 	return db
 		.select({ code: studySet.termLang, sets: count() })
 		.from(studySet)
-		.where(eq(studySet.visibility, 'public'))
+		.where(and(eq(studySet.visibility, 'public'), level ? eq(studySet.level, level) : undefined))
 		.groupBy(studySet.termLang)
 		.orderBy(desc(count()));
+}
+
+/** Levels that have public sets (in `lang`, if given). */
+export async function listPublicLevels(lang?: string) {
+	const rows = await db
+		.select({ level: studySet.level, sets: count() })
+		.from(studySet)
+		.where(
+			and(
+				eq(studySet.visibility, 'public'),
+				isNotNull(studySet.level),
+				lang ? eq(studySet.termLang, lang) : undefined
+			)
+		)
+		.groupBy(studySet.level);
+	return rows as { level: Level; sets: number }[];
 }
 
 export async function createSet(ownerId: string, input: SetInput, cards: ParsedCard[]) {
@@ -240,6 +271,7 @@ export async function copySet(setId: string, userId: string) {
 			description: set.description,
 			termLang: set.termLang,
 			defLang: set.defLang,
+			level: set.level,
 			visibility: 'private'
 		},
 		cards

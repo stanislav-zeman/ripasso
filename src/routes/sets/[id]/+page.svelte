@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
+	import LevelBadge from '#lib/components/LevelBadge.svelte';
 	import SpeakButton from '#lib/components/SpeakButton.svelte';
 	import StarButton from '#lib/components/StarButton.svelte';
 	import { languageLabel } from '#lib/languages.ts';
@@ -36,6 +37,7 @@
 	<div>
 		<div class="flex flex-wrap items-start gap-3">
 			<h1 class="flex-1 text-2xl font-bold sm:text-3xl">{data.set.title}</h1>
+			{#if data.set.level}<LevelBadge level={data.set.level} />{/if}
 			<span class="chip">{data.set.visibility}</span>
 		</div>
 		{#if data.set.description}<p class="mt-2 text-muted">{data.set.description}</p>{/if}
