@@ -45,7 +45,8 @@
 			{cards.length} card{cards.length === 1 ? '' : 's'} · {languageLabel(data.set.termLang)} → {languageLabel(
 				data.set.defLang
 			)}
-			{#if !data.isOwner}· by {data.ownerName}{/if}
+			{#if !data.isOwner}· by
+				<a class="link" href="/users/{data.set.ownerId}">{data.ownerName}</a>{/if}
 		</p>
 	</div>
 

@@ -11,6 +11,7 @@
 			level: Level | null;
 			description: string;
 			cards: number;
+			ownerId?: string;
 			ownerName?: string;
 			visibility?: string;
 			due?: number;
@@ -21,12 +22,18 @@
 	let { set, showOwner = false }: Props = $props();
 </script>
 
-<a
-	href="/sets/{set.id}"
-	class="flex flex-col gap-2 card p-4 transition hover:-translate-y-0.5 hover:border-accent"
+<!-- The title link stretches over the whole card; the author link sits above it. -->
+<article
+	class="relative flex flex-col gap-2 card p-4 transition focus-within:border-accent hover:-translate-y-0.5 hover:border-accent"
 >
 	<div class="flex items-start gap-2">
-		<h3 class="flex-1 font-semibold">{set.title}</h3>
+		<h3 class="flex-1 font-semibold">
+			<a
+				href="/sets/{set.id}"
+				class="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none"
+				>{set.title}</a
+			>
+		</h3>
 		{#if set.due}<span class="chip shrink-0">{set.due} due</span>{/if}
 	</div>
 	<p class="flex flex-wrap items-center gap-1.5">
@@ -40,7 +47,14 @@
 	{#if set.description}<p class="line-clamp-2 text-sm text-muted">{set.description}</p>{/if}
 	<p class="mt-auto text-xs text-muted">
 		{set.cards} card{set.cards === 1 ? '' : 's'}
-		{#if showOwner && set.ownerName}· by {set.ownerName}{/if}
+		{#if showOwner && set.ownerName}
+			· by
+			{#if set.ownerId}<a
+					href="/users/{set.ownerId}"
+					class="relative z-10 font-medium text-ink/80 hover:text-accent hover:underline"
+					>{set.ownerName}</a
+				>{:else}{set.ownerName}{/if}
+		{/if}
 		{#if set.visibility && set.visibility !== 'private'}· {set.visibility}{/if}
 	</p>
-</a>
+</article>

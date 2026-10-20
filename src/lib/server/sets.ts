@@ -137,11 +137,12 @@ export async function listLibrary(userId: string) {
 export interface PublicFilters {
 	lang?: string;
 	level?: Level;
+	ownerId?: string;
 }
 
 export async function listPublicSets(
 	query: string,
-	{ lang, level }: PublicFilters = {},
+	{ lang, level, ownerId }: PublicFilters = {},
 	limit = 50
 ) {
 	const q = `%${query.trim().replace(/[%_]/g, '')}%`;
@@ -152,6 +153,7 @@ export async function listPublicSets(
 			termLang: studySet.termLang,
 			level: studySet.level,
 			description: studySet.description,
+			ownerId: studySet.ownerId,
 			ownerName: user.name,
 			updatedAt: studySet.updatedAt,
 			cards: sql<number>`coalesce(${cardCount.cards}, 0)`.mapWith(Number)
@@ -162,6 +164,7 @@ export async function listPublicSets(
 		.where(
 			and(
 				eq(studySet.visibility, 'public'),
+				ownerId ? eq(studySet.ownerId, ownerId) : undefined,
 				lang ? eq(studySet.termLang, lang) : undefined,
 				level ? eq(studySet.level, level) : undefined,
 				query.trim() ? or(like(studySet.title, q), like(studySet.description, q)) : undefined
@@ -169,6 +172,17 @@ export async function listPublicSets(
 		)
 		.orderBy(desc(studySet.updatedAt))
 		.limit(limit);
+}
+
+/** A user's public profile: only their name, photo and public sets, never their email. */
+export async function getPublicProfile(userId: string) {
+	const [profile] = await db
+		.select({ id: user.id, name: user.name, image: user.image, createdAt: user.createdAt })
+		.from(user)
+		.where(eq(user.id, userId));
+	if (!profile) error(404, 'User not found');
+	const sets = await listPublicSets('', { ownerId: userId }, 500);
+	return { profile, sets };
 }
 
 /** Languages that have public sets (at `level`, if given), most sets first. */

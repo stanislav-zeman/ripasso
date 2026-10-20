@@ -21,6 +21,7 @@
 						reviews due. Learn something new?{:else}Create your first set to get started.{/if}
 				</p>
 			</div>
+			<a href="/users/{data.user.id}" class="btn-ghost">Public profile</a>
 			{#if due}
 				<a href="/review" class="btn-primary">Start daily review</a>
 			{:else if !data.sets.length}
