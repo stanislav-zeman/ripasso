@@ -66,6 +66,16 @@
 		"esbuild@0.18.20": true
 	},
 	"dependencies": {
+		"@vercel/analytics": "^2.0.1",
+		"@vercel/speed-insights": "^2.0.0",
 		"ts-fsrs": "^5.4.2"
+	},
+	"overrides": {
+		"@vercel/analytics": {
+			"@sveltejs/kit": "$@sveltejs/kit"
+		},
+		"@vercel/speed-insights": {
+			"@sveltejs/kit": "$@sveltejs/kit"
+		}
 	}
 }

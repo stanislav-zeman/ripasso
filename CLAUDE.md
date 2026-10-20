@@ -98,6 +98,7 @@ The sandbox creates `demo@ripasso.test` (a learner with no sets) and `author@rip
 
 - **Pronunciation:** browser `speechSynthesis` (`src/lib/tts.ts`).
 - **Sound effects:** synthesized with Web Audio (`src/lib/sound.svelte.ts`), with no audio files; volume and mute are stored in localStorage and controlled by `SoundControl` in the header.
+- **Vercel Web Analytics and Speed Insights:** `src/lib/analytics.ts`, called from the root layout. Don't switch to the packages' `/sveltekit` entry points: they import `$app/environment` and `$app/stores`, which SvelteKit 3 removed. Their peer ranges don't include Kit 3 either, so `package.json` has `overrides` entries to allow the install.
 
 ## Seed word sets
 

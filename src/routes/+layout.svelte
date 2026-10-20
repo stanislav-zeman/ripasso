@@ -3,9 +3,12 @@
 	import favicon from '#lib/assets/favicon.svg';
 	import { page } from '$app/state';
 	import SoundControl from '#lib/components/SoundControl.svelte';
+	import { injectVercelInsights } from '#lib/analytics.ts';
 	import type { LayoutProps } from './$types';
 
 	let { children, data }: LayoutProps = $props();
+
+	injectVercelInsights();
 
 	const links = [
 		{ href: '/', label: 'Library' },
