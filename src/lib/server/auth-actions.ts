@@ -54,5 +54,6 @@ export async function signInGoogle(event: RequestEvent) {
 	}, 'Google sign in failed');
 	if (failure) return failure;
 	if (!url) return fail(500, { message: 'Google sign in is not available.' });
-	redirect(303, url);
+	// SvelteKit 3 refuses external redirects unless the target origin is allowed explicitly.
+	redirect(303, url, { external: ['https://accounts.google.com'] });
 }
