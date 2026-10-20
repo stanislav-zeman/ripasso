@@ -25,6 +25,9 @@ export const auth = betterAuth({
 		// Signing in with Google using the same email as a password account links the two.
 		accountLinking: { enabled: true, trustedProviders: ['google'] }
 	},
+	// Errors without a page to return to (e.g. an expired sign-in link) land on the login page
+	// with `?error=…` instead of Better Auth's built-in error page.
+	onAPIError: { errorURL: '/login' },
 	plugins: [
 		sveltekitCookies(getRequestEvent) // make sure this is the last plugin in the array
 	]

@@ -45,10 +45,18 @@ export async function signUpEmail(event: RequestEvent) {
 }
 
 export async function signInGoogle(event: RequestEvent) {
+	// If Google sign-in fails or is cancelled, come back to this page (Better Auth adds `?error=…`).
+	const back = new URL(event.url.pathname, event.url);
+	const next = event.url.searchParams.get('next');
+	if (next) back.searchParams.set('next', next);
 	let url: string | undefined;
 	const failure = await run(async () => {
 		const result = await auth.api.signInSocial({
-			body: { provider: 'google', callbackURL: safeNext(event.url) }
+			body: {
+				provider: 'google',
+				callbackURL: safeNext(event.url),
+				errorCallbackURL: back.pathname + back.search
+			}
 		});
 		url = result.url;
 	}, 'Google sign in failed');

@@ -11,7 +11,20 @@
 	let pending = $state(false);
 
 	const isSignup = $derived(mode === 'signup');
-	const query = $derived(page.url.search);
+	// `?error=…` is added when a Google sign-in comes back unsuccessful.
+	const query = $derived.by(() => {
+		const kept = [...page.url.searchParams].filter(([key]) => key !== 'error');
+		return kept.length ? `?${new URLSearchParams(kept)}` : '';
+	});
+	const oauthError = $derived(page.url.searchParams.get('error'));
+	const message = $derived(
+		form?.message ??
+			(oauthError === 'access_denied'
+				? 'Google sign-in was cancelled.'
+				: oauthError
+					? 'Google sign-in didn’t work. Please try again.'
+					: null)
+	);
 
 	const submit = () => {
 		pending = true;
@@ -89,8 +102,8 @@
 			/>
 			{#if isSignup}<span class="mt-1 block text-xs text-muted">At least 8 characters.</span>{/if}
 		</label>
-		{#if form?.message}
-			<p class="text-sm text-bad" role="alert">{form.message}</p>
+		{#if message}
+			<p class="text-sm text-bad" role="alert">{message}</p>
 		{/if}
 		<button class="btn-primary w-full" disabled={pending}>{isSignup ? 'Sign up' : 'Log in'}</button>
 	</form>
