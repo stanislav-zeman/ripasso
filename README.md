@@ -21,16 +21,20 @@ npm run db:migrate            # creates local.db
 npm run dev
 ```
 
-| Command                              | What it does                                                   |
-| ------------------------------------ | -------------------------------------------------------------- |
-| `npm run dev`                        | Dev server on http://localhost:5173                            |
-| `npm run check` / `npm run lint`     | Type check / Prettier + ESLint                                 |
-| `npm run test:unit`                  | Vitest (parser, grader, scheduler, learn queue)                |
-| `npm run test:e2e`                   | Playwright against a throwaway `e2e.db`                        |
-| `npm run db:generate`                | Create a migration after editing `src/lib/server/db/schema.ts` |
-| `npm run db:migrate`                 | Apply migrations to the database in `DATABASE_URL`             |
-| `npm run db:studio`                  | Browse the database                                            |
-| `npm run db:seed -- --owner <email>` | Load the ready-made word sets from `seed/` (see below)         |
+| Command                                                       | What it does                                                                          |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `npm run dev`                                                 | Dev server on http://localhost:5173                                                   |
+| `npm run dev:sandbox`                                         | Throwaway copy of the app on :5174 with demo accounts and the seed sets (`.sandbox/`) |
+| `npm run screenshot -- <path>`                                | Screenshot a sandbox page (`--login demo`, `--dark`, `--mobile`, `--full`)            |
+| `npm run verify`                                              | Lint, type check and unit tests in one go                                             |
+| `npm run check` / `npm run lint`                              | Type check / Prettier + ESLint                                                        |
+| `npm run test:unit`                                           | Vitest (parser, grader, scheduler, learn queue)                                       |
+| `npm run test:e2e`                                            | Playwright against a throwaway `e2e.db`                                               |
+| `npm run db:generate`                                         | Create a migration after editing `src/lib/server/db/schema.ts`                        |
+| `npm run db:migrate`                                          | Apply migrations to the database in `DATABASE_URL`                                    |
+| `npm run db:studio`                                           | Browse the database                                                                   |
+| `npm run db:seed -- --owner <email>`                          | Load the ready-made word sets from `seed/` (see below)                                |
+| `npm run db:migrate:prod` / `db:seed:prod` / `db:studio:prod` | The same, against production (reads `.env.production`)                                |
 
 ## Ready-made word sets
 
@@ -44,7 +48,7 @@ By default the command loads every folder; pass folders to load only those, e.g.
 ```sh
 npm run db:seed -- --owner you@example.com                        # local database (.env)
 npm run db:seed -- --owner you@example.com --visibility private   # only visible to you
-DATABASE_URL=libsql://… DATABASE_AUTH_TOKEN=… npm run db:seed -- --owner you@example.com   # production
+npm run db:seed:prod -- --owner you@example.com                   # production (.env.production)
 ```
 
 The owner must already have an account (sign up in the app first). Sets are public by default, so they show up in Explore. Running the command again skips sets the owner already has. Each file is a plain TSV (`term<TAB>definition`, with `# title:`, `# language:`, `# translated:` and optional `# level:` headers), so it can also be pasted into the app's import box. Text in parentheses, like `(m.)` or `(di)`, is shown as a hint and is optional when typing answers.
@@ -60,6 +64,8 @@ The owner must already have an account (sign up in the app first). Sets are publ
 2. **Google sign-in (optional):** in Google Cloud Console create an OAuth client (type _Web application_) with the redirect URIs `http://localhost:5173/api/auth/callback/google` and `https://<your-domain>/api/auth/callback/google`. Vercel preview URLs change per deploy, so Google login works on the production domain and localhost only (email login works everywhere).
 3. **Vercel:** import the Git repository and set the environment variables from `.env.example`: `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `ORIGIN` (e.g. `https://ripasso.vercel.app`), `BETTER_AUTH_SECRET` (`openssl rand -base64 32`), and optionally `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`.
 4. **Deploy.** The `vercel-build` script runs `drizzle-kit migrate` before building, so schema changes are applied on every deploy.
+
+For production maintenance from your machine, keep the production `DATABASE_URL` and `DATABASE_AUTH_TOKEN` in a git-ignored `.env.production`, and keep `.env` pointing at `file:local.db`. The database commands refuse any remote database unless they are run through the `:prod` scripts (or on Vercel), so a misconfigured `.env` can't change production by accident.
 
 ## Notes
 

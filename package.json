@@ -5,6 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
+		"dev:sandbox": "node scripts/sandbox.js",
+		"screenshot": "node scripts/screenshot.js",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
@@ -19,8 +21,12 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
+		"db:migrate:prod": "ALLOW_REMOTE_DB=1 node --env-file=.env.production node_modules/drizzle-kit/bin.cjs migrate",
+		"db:studio:prod": "ALLOW_REMOTE_DB=1 node --env-file=.env.production node_modules/drizzle-kit/bin.cjs studio",
 		"vercel-build": "drizzle-kit migrate && vite build",
-		"db:seed": "node scripts/seed.js"
+		"db:seed": "node scripts/seed.js",
+		"db:seed:prod": "ALLOW_REMOTE_DB=1 node --env-file=.env.production scripts/seed.js",
+		"verify": "npm run lint && npm run check && vitest run"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

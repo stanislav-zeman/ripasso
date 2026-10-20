@@ -1,9 +1,11 @@
 import { existsSync } from 'node:fs';
 import { defineConfig } from 'drizzle-kit';
+import { assertDatabaseAllowed } from './scripts/db-guard.js';
 
 // Locally, read .env; on Vercel the variables come from the project settings.
 if (existsSync('.env')) process.loadEnvFile('.env');
 if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
+assertDatabaseAllowed(process.env.DATABASE_URL);
 
 export default defineConfig({
 	schema: './src/lib/server/db/schema.ts',

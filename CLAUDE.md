@@ -9,7 +9,8 @@ Ripasso is a Quizlet-style vocabulary app: users make sets of term/definition ca
 Node 22.17+ (`.node-version`). Install with `npx npm@11 install`: npm 10 crashes resolving this tree from scratch (`npm ci` from the lockfile is fine, which is what CI and Vercel do).
 
 ```sh
-npm run dev                      # http://localhost:5173
+npm run verify                   # lint + type check + unit tests: run before calling a change done
+npm run dev                      # http://localhost:5173, against .env's (local) database
 npm run check                    # svelte-check (types)
 npm run lint                     # prettier --check + eslint
 npm run format
@@ -18,17 +19,35 @@ npx vitest run src/lib/grade.spec.ts -t "accents"   # one file / one test
 npm run test:e2e                 # Playwright (e2e/*.e2e.ts)
 npx playwright test -g "profile" # one E2E test
 npm run db:generate              # new migration after editing schema.ts
-npm run db:migrate
+npm run db:migrate               # local database only (see below)
 npm run db:seed -- --owner you@example.com [--visibility private] [seed/italian-a2]
 ```
 
 E2E builds and previews the app on port 4173 against a throwaway `e2e.db` (env set in `playwright.config.ts`); it never touches `.env`'s database. CI (`.github/workflows/ci.yml`, on pushes to `master` and PRs) runs lint, check, unit and E2E.
 
+### Seeing a change in the running app
+
+Use the sandbox, not `npm run dev`, so test data never lands in `local.db`:
+
+```sh
+npm run dev:sandbox                       # http://localhost:5174, fresh .sandbox/sandbox.db each start (--keep to reuse)
+npm run screenshot -- /explore            # -> .sandbox/screenshots/explore-light-desktop.png
+npm run screenshot -- /review --login demo --dark --mobile --full
+```
+
+The sandbox creates `demo@ripasso.test` (a learner with no sets) and `author@ripasso.test` (owns every seed set, all public); both use the password `password123`. `screenshot` exits non-zero and lists any page errors, console errors or 5xx responses; read the PNG to check the layout.
+
 ## Database and environment: be careful
 
-- `.env` may point `DATABASE_URL` at the **production** Turso database. `npm run dev`, `db:migrate`, `db:seed` and `drizzle-kit` all read it. For local work, prefix commands with `DATABASE_URL=file:local.db DATABASE_AUTH_TOKEN=`, or check `.env` first. `process.loadEnvFile` doesn't override variables that are already set, so a prefix always wins.
+- `.env` is for local work (`DATABASE_URL="file:local.db"`). Production credentials live only in `.env.production`. `scripts/db-guard.js` makes `drizzle-kit` (via `drizzle.config.ts`) and `db:seed` **refuse any non-`file:` database** unless `ALLOW_REMOTE_DB=1` or the build runs on Vercel, and the dev server prints a warning when it's pointed at a remote database.
+- To touch production on purpose, use `npm run db:migrate:prod`, `db:seed:prod` or `db:studio:prod`. They load `.env.production` and set `ALLOW_REMOTE_DB=1`. Only run these when the user explicitly asks; a project hook (`.claude/hooks/guard-prod-db.sh`) asks for confirmation on any command mentioning them, `.env.production`, `ALLOW_REMOTE_DB` or `libsql://`.
+- `process.loadEnvFile('.env')` doesn't override variables that are already set, so an inline `DATABASE_URL=…` prefix (or `node --env-file`) always wins over `.env`.
 - Migrations live in `drizzle/` and run automatically on every Vercel deploy (`vercel-build`). Prefer additive changes (new nullable columns, indexes). Changing a column default or constraint in SQLite makes drizzle-kit rebuild the table, and on Turso the `PRAGMA foreign_keys=OFF` it relies on is a no-op inside the migration transaction, so `ON DELETE CASCADE` would wipe child rows (cards, progress). That's why `study_set.term_lang` still has a stale `'it'` default.
 - `src/lib/server/db/auth.schema.ts` (Better Auth tables) is written by hand: the `auth generate` CLI can't load a SvelteKit 3 config.
+
+## Claude Code setup
+
+`.claude/settings.json` allowlists the routine commands above, blocks the file tools from reading `.env.production`, runs the production-database hook, and formats every edited file with Prettier (`.claude/hooks/format.sh`). The `word-sets` skill (`.claude/skills/word-sets/`) covers writing new seed sets.
 
 ## SvelteKit 3 conventions used here
 
@@ -84,5 +103,5 @@ E2E builds and previews the app on port 4173 against a throwaway `e2e.db` (env s
 
 - **Format:** `seed/<folder>/*.tsv`. Each file is one set: `# title:`, `# description:`, `# language:`, `# translated:` and optional `# level:` headers, then `term<TAB>definition` lines.
 - **Validation:** `src/lib/seed.spec.ts` checks every file (headers valid, unique terms, every card answerable through `grade()`), so new seed content is tested automatically.
-- **Loading:** `scripts/seed.js` is plain Node + `@libsql/client` with raw SQL, so it doesn't depend on the SvelteKit runtime. It skips sets the owner already has by title.
+- **Loading:** `scripts/seed.js` is plain Node + `@libsql/client` with raw SQL, so it doesn't depend on the SvelteKit runtime. It skips sets the owner already has by title. The `word-sets` skill has the full workflow.
 - **Content conventions:** nouns with articles, `(m.)`/`(f.)` for `l'` nouns, prepositions in parentheses, `/`-separated alternative meanings, and no duplicate meanings within a set.

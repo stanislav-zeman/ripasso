@@ -12,13 +12,15 @@
 //   il colloquio di lavoro<TAB>job interview
 //
 // Sets the owner already has (same title) are skipped, so running it twice is safe.
-// Uses DATABASE_URL / DATABASE_AUTH_TOKEN from the environment or .env.
+// Uses DATABASE_URL / DATABASE_AUTH_TOKEN from the environment or .env (local only; see
+// db-guard.js). For production: npm run db:seed:prod -- --owner you@example.com
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { randomUUID } from 'node:crypto';
 import { createClient } from '@libsql/client';
+import { assertDatabaseAllowed } from './db-guard.js';
 
 const VISIBILITIES = ['private', 'unlisted', 'public'];
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
@@ -45,6 +47,11 @@ if (!VISIBILITIES.includes(values.visibility)) {
 if (existsSync('.env')) process.loadEnvFile('.env');
 const url = process.env.DATABASE_URL;
 if (!url) fail('DATABASE_URL is not set');
+try {
+	assertDatabaseAllowed(url);
+} catch (e) {
+	fail(e.message);
+}
 
 const dirs = positionals.length
 	? positionals

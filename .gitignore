@@ -29,3 +29,6 @@ test-results
 # E2E database
 e2e.db*
 playwright-report
+
+# npm run dev:sandbox
+.sandbox
