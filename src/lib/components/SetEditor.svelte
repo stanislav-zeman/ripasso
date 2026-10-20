@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { LANGUAGES } from '#lib/languages.ts';
+	import { isLanguage, LANGUAGES, languageName } from '#lib/languages.ts';
 	import { MAX_CARDS, parseCards, SEPARATORS, type Separator } from '#lib/parse.ts';
 
 	interface EditorCard {
@@ -25,13 +26,15 @@
 
 	let { initial, message, submitLabel }: Props = $props();
 
-	const IMPORT_EXAMPLE = 'il gatto\tthe cat\nla casa\tthe house\nperché\twhy / because';
+	const IMPORT_EXAMPLE = 'el perro\tthe dog\nla casa\tthe house\ngracias\tthank you';
+	const LANGS_KEY = 'ripasso:last-langs';
 
 	// Editor state is seeded once from `initial`; later prop changes shouldn't overwrite edits.
 	const seed = (() => initial)();
 	let title = $state(seed?.title ?? '');
 	let description = $state(seed?.description ?? '');
-	let termLang = $state(seed?.termLang ?? 'it');
+	// New sets start without a term language, so it's chosen deliberately (then remembered).
+	let termLang = $state(seed?.termLang ?? '');
 	let defLang = $state(seed?.defLang ?? 'en');
 	let visibility = $state(seed?.visibility ?? 'private');
 	let cards = $state<EditorCard[]>(seed?.cards.map((c) => ({ key: c.id, ...c })) ?? []);
@@ -49,6 +52,30 @@
 	const filled = $derived(
 		cards.filter((c) => c.term.trim() && c.definition.trim()).length + parsed.cards.length
 	);
+
+	onMount(() => {
+		if (seed) return;
+		try {
+			const last = JSON.parse(localStorage.getItem(LANGS_KEY) ?? 'null');
+			if (isLanguage(last?.termLang)) termLang = last.termLang;
+			if (isLanguage(last?.defLang)) defLang = last.defLang;
+			else {
+				// Default definitions to the browser's language, if we know it.
+				const browser = navigator.language.slice(0, 2);
+				if (isLanguage(browser)) defLang = browser;
+			}
+		} catch {
+			// Storage can be unavailable; the defaults are fine.
+		}
+	});
+
+	function rememberLangs() {
+		try {
+			localStorage.setItem(LANGS_KEY, JSON.stringify({ termLang, defLang }));
+		} catch {
+			// Remembering the languages is a convenience only.
+		}
+	}
 
 	function addCard() {
 		cards.push({ key: crypto.randomUUID(), term: '', definition: '' });
@@ -81,6 +108,7 @@
 			importCards();
 			formData.set('cards', serialize());
 		}
+		rememberLangs();
 		pending = true;
 		return async ({ update }) => {
 			await update({ reset: false });
@@ -100,7 +128,7 @@
 				bind:value={title}
 				required
 				maxlength="200"
-				placeholder="e.g. Italian A1 – Food"
+				placeholder="e.g. Food & drink – A1"
 			/>
 		</label>
 		<label class="block">
@@ -111,17 +139,18 @@
 		<div class="grid gap-4 sm:grid-cols-3">
 			<label class="block">
 				<span class="label">Term language</span>
-				<select class="input" name="termLang" bind:value={termLang}>
-					{#each Object.entries(LANGUAGES) as [code, name] (code)}<option value={code}
-							>{name}</option
+				<select class="input" name="termLang" bind:value={termLang} required>
+					<option value="" disabled>Choose…</option
+					>{#each Object.entries(LANGUAGES) as [code, lang] (code)}<option value={code}
+							>{lang.name}</option
 						>{/each}
 				</select>
 			</label>
 			<label class="block">
 				<span class="label">Definition language</span>
-				<select class="input" name="defLang" bind:value={defLang}>
-					{#each Object.entries(LANGUAGES) as [code, name] (code)}<option value={code}
-							>{name}</option
+				<select class="input" name="defLang" bind:value={defLang} required>
+					{#each Object.entries(LANGUAGES) as [code, lang] (code)}<option value={code}
+							>{lang.name}</option
 						>{/each}
 				</select>
 			</label>
@@ -147,7 +176,7 @@
 			<p class="mt-1 text-sm text-muted">
 				One card per line, term first. Paste a Quizlet export (“Tab” between term and definition) or
 				lines like
-				<code class="rounded bg-bg px-1">il gatto - the cat</code>.
+				<code class="rounded bg-bg px-1 whitespace-nowrap">la casa - the house</code>.
 			</p>
 			<textarea
 				class="input mt-3 font-mono text-sm"
@@ -208,13 +237,13 @@
 					<input
 						class="input mt-0"
 						bind:value={c.term}
-						placeholder="Term ({LANGUAGES[termLang]})"
+						placeholder={termLang ? `Term (${languageName(termLang)})` : 'Term'}
 						aria-label="Term {i + 1}"
 					/>
 					<input
 						class="input mt-0"
 						bind:value={c.definition}
-						placeholder="Definition ({LANGUAGES[defLang]})"
+						placeholder={defLang ? `Definition (${languageName(defLang)})` : 'Definition'}
 						aria-label="Definition {i + 1}"
 					/>
 				</div>
@@ -256,8 +285,13 @@
 		class="sticky bottom-3 flex items-center justify-end gap-3 card bg-surface/90 px-4 py-3 shadow-lg backdrop-blur"
 	>
 		{#if message}<p class="mr-auto text-sm text-bad" role="alert">{message}</p>{/if}
-		<span class="text-sm text-muted">{filled} complete card{filled === 1 ? '' : 's'}</span>
-		<button class="btn-primary" disabled={pending || !title.trim() || !filled}>{submitLabel}</button
+		<span class="text-sm text-muted">
+			{#if !termLang}Choose a term language to save{:else}{filled} complete card{filled === 1
+					? ''
+					: 's'}{/if}
+		</span>
+		<button class="btn-primary" disabled={pending || !title.trim() || !termLang || !filled}
+			>{submitLabel}</button
 		>
 	</div>
 </form>

@@ -3,7 +3,8 @@
 	import { prefs, savePrefs, type Langs } from '#lib/study/prefs.svelte.ts';
 
 	interface Props {
-		langs: Langs;
+		/** Omit when cards come from sets in different languages. */
+		langs?: Langs;
 		/** Which options to show. */
 		show?: ('answerWith' | 'starredOnly' | 'shuffle')[];
 		starredCount?: number;
@@ -30,8 +31,10 @@
 			<label class="block">
 				<span class="label">Answer with</span>
 				<select class="input" bind:value={prefs.answerWith} onchange={changed}>
-					<option value="term">Term ({languageName(langs.termLang)})</option>
-					<option value="definition">Definition ({languageName(langs.defLang)})</option>
+					<option value="term">Term{langs ? ` (${languageName(langs.termLang)})` : ''}</option>
+					<option value="definition"
+						>Definition{langs ? ` (${languageName(langs.defLang)})` : ''}</option
+					>
 				</select>
 			</label>
 		{/if}

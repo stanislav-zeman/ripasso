@@ -1,6 +1,6 @@
 # Ripasso
 
-A small, self-hosted Quizlet alternative for learning vocabulary (built with Italian in mind).
+A small, self-hosted Quizlet alternative for learning vocabulary in any language.
 
 - **Sets** of term/definition cards, created by pasting a list (Quizlet export, `word - meaning`, CSV-ish) or with the card editor
 - **Study modes:** Flashcards, Learn (spaced repetition with [FSRS](https://github.com/open-spaced-repetition/ts-fsrs)), Write (accent-aware grading), Test (multiple choice), Match (timed game)

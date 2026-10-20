@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import { grade, type Verdict } from '#lib/grade.ts';
+	import { LANGUAGES } from '#lib/languages.ts';
 	import AccentBar from './AccentBar.svelte';
 	import SpeakButton from './SpeakButton.svelte';
 
@@ -14,6 +15,8 @@
 	}
 
 	let { prompt, promptLang, answer, answerLang, onresult }: Props = $props();
+
+	const specialChars = $derived(LANGUAGES[answerLang]?.specialChars ?? []);
 
 	let value = $state('');
 	let verdict = $state<Verdict | null>(null);
@@ -30,7 +33,7 @@
 		e.preventDefault();
 		if (verdict) return finish(verdict);
 		elapsed = performance.now() - started;
-		verdict = grade(value, answer);
+		verdict = grade(value, answer, { lang: answerLang });
 		if (verdict === 'correct') {
 			setTimeout(() => finish('correct'), 700);
 		} else {
@@ -73,7 +76,8 @@
 		</label>
 		{#if !verdict}
 			<div class="flex flex-wrap items-center justify-between gap-3">
-				{#if answerLang === 'it'}<AccentBar target={input} />{:else}<span></span>{/if}
+				{#if specialChars.length}<AccentBar target={input} chars={specialChars} />{:else}<span
+					></span>{/if}
 				<div class="flex gap-2">
 					<button
 						type="button"

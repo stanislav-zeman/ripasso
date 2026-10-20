@@ -3,27 +3,34 @@ import { grade } from './grade';
 
 describe('grade', () => {
 	it('accepts exact answers regardless of case, whitespace and punctuation', () => {
-		expect(grade('  Perché? ', 'perché')).toBe('correct');
+		expect(grade('  ¿Por qué? ', 'por qué')).toBe('correct');
 	});
 
 	it('flags answers that only miss accents', () => {
 		expect(grade('perche', 'perché')).toBe('accent');
-		expect(grade('citta', 'la città')).toBe('accent');
+		expect(grade('cafe', 'le café', { lang: 'fr' })).toBe('accent');
+		expect(grade('Strasse', 'die Straße', { lang: 'de' })).toBe('wrong');
 	});
 
-	it('ignores leading articles unless disabled', () => {
-		expect(grade('casa', 'la casa')).toBe('correct');
-		expect(grade("l'acqua", 'acqua')).toBe('correct');
-		expect(grade('casa', 'la casa', { ignoreArticles: false })).toBe('wrong');
+	it("ignores the answer language's leading articles", () => {
+		expect(grade('casa', 'la casa', { lang: 'it' })).toBe('correct');
+		expect(grade("l'acqua", 'acqua', { lang: 'it' })).toBe('correct');
+		expect(grade('Hund', 'der Hund', { lang: 'de' })).toBe('correct');
+		expect(grade('cat', 'the cat', { lang: 'en' })).toBe('correct');
+		// Articles are only stripped as whole words, and only for the given language.
+		expect(grade('apple', 'an apple', { lang: 'en' })).toBe('correct');
+		expect(grade('casa', 'la casa', { lang: 'en' })).toBe('wrong');
+		expect(grade('casa', 'la casa')).toBe('wrong');
+		expect(grade('casa', 'la casa', { lang: 'it', ignoreArticles: false })).toBe('wrong');
 	});
 
 	it('accepts any of several alternatives', () => {
 		expect(grade('to dine', 'to eat; to dine')).toBe('correct');
-		expect(grade('pranzare', 'mangiare / pranzare')).toBe('correct');
+		expect(grade('almorzar', 'comer / almorzar')).toBe('correct');
 	});
 
 	it('rejects wrong and empty answers', () => {
-		expect(grade('cane', 'gatto')).toBe('wrong');
-		expect(grade('', 'gatto')).toBe('wrong');
+		expect(grade('dog', 'cat')).toBe('wrong');
+		expect(grade('', 'cat')).toBe('wrong');
 	});
 });

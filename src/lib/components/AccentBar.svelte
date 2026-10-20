@@ -2,10 +2,10 @@
 	interface Props {
 		/** The input that receives the characters. */
 		target: HTMLInputElement | undefined;
-		chars?: string[];
+		chars: string[];
 	}
 
-	let { target, chars = ['à', 'è', 'é', 'ì', 'ò', 'ù'] }: Props = $props();
+	let { target, chars }: Props = $props();
 
 	function insert(char: string) {
 		if (!target) return;

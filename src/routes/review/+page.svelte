@@ -25,11 +25,7 @@
 <svelte:head><title>Daily review · Ripasso</title></svelte:head>
 
 <StudyHeader title="Everything due today" mode="Daily review" backHref="/">
-	<StudyOptions
-		langs={{ termLang: 'it', defLang: 'en' }}
-		show={['answerWith']}
-		onchange={newSession}
-	/>
+	<StudyOptions show={['answerWith']} onchange={newSession} />
 </StudyHeader>
 
 {#if cards.length}

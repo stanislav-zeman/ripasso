@@ -14,7 +14,7 @@
 		type="search"
 		name="q"
 		value={data.q}
-		placeholder="Search, e.g. “verbi”, “food”, “A1”"
+		placeholder="Search, e.g. “verbs”, “food”, “A1”"
 		aria-label="Search sets"
 	/>
 	<button class="btn-primary">Search</button>

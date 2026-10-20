@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const WORDS =
-	'il gatto\tthe cat\nla casa\tthe house\nperché\twhy\nil cane\tthe dog\nmangiare\tto eat';
+	'el gato\tthe cat\nla casa\tthe house\npor qué\twhy\nel perro\tthe dog\ncomer\tto eat';
 
 async function signUp(page: Page, name: string) {
 	await page.goto('/signup');
@@ -9,7 +9,7 @@ async function signUp(page: Page, name: string) {
 	await page.getByLabel('Email').fill(`${name.toLowerCase()}-${Date.now()}@example.com`);
 	await page.getByLabel('Password').fill('password123');
 	await page.getByRole('button', { name: 'Sign up' }).click();
-	await expect(page.getByRole('heading', { name: `Ciao, ${name}!` })).toBeVisible();
+	await expect(page.getByRole('heading', { name: `Hi, ${name}!` })).toBeVisible();
 }
 
 test('create a set, study it, and keep it private from others', async ({ page }) => {
@@ -17,11 +17,13 @@ test('create a set, study it, and keep it private from others', async ({ page })
 
 	// Create a set by pasting a Quizlet-style export.
 	await page.getByRole('link', { name: '+ New set' }).click();
-	await page.getByLabel('Title').fill('Animali e casa');
-	await page.getByPlaceholder(/il gatto/).fill(WORDS);
+	await page.getByLabel('Title').fill('Animales y casa');
+	await page.getByLabel('Term language').selectOption('Spanish');
+	await page.getByLabel('Definition language').selectOption('English');
+	await page.getByPlaceholder(/el perro/).fill(WORDS);
 	await page.getByRole('button', { name: 'Add 5 cards' }).click();
 	await page.getByRole('button', { name: 'Create set' }).click();
-	await expect(page.getByRole('heading', { name: 'Animali e casa' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Animales y casa' })).toBeVisible();
 	await expect(page.getByText('5 cards')).toBeVisible();
 	const setUrl = page.url();
 
@@ -33,15 +35,15 @@ test('create a set, study it, and keep it private from others', async ({ page })
 	await page.getByRole('button', { name: 'Know it' }).click();
 	await known;
 
-	// Write mode accepts an answer without accents as "almost".
+	// Write mode ignores Spanish articles and accepts an answer without accents as "almost".
 	await page.goto(`${setUrl}/write`);
 	const prompt = (await page.locator('.card p').first().textContent())!.trim();
 	const answers: Record<string, string> = {
-		'the cat': 'gatto',
+		'the cat': 'gato',
 		'the house': 'casa',
-		why: 'perche',
-		'the dog': 'cane',
-		'to eat': 'mangiare'
+		why: 'por que',
+		'the dog': 'perro',
+		'to eat': 'comer'
 	};
 	await page.getByLabel('Type the answer').fill(answers[prompt]);
 	await page.getByRole('button', { name: 'Answer' }).click();
