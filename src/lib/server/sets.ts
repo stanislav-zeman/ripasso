@@ -108,6 +108,7 @@ export async function listLibrary(userId: string) {
 		.select({
 			id: studySet.id,
 			title: studySet.title,
+			termLang: studySet.termLang,
 			description: studySet.description,
 			visibility: studySet.visibility,
 			ownerId: studySet.ownerId,
@@ -129,12 +130,13 @@ export async function listLibrary(userId: string) {
 		.orderBy(desc(studySet.updatedAt));
 }
 
-export async function listPublicSets(query: string, limit = 50) {
+export async function listPublicSets(query: string, lang = '', limit = 50) {
 	const q = `%${query.trim().replace(/[%_]/g, '')}%`;
 	return db
 		.select({
 			id: studySet.id,
 			title: studySet.title,
+			termLang: studySet.termLang,
 			description: studySet.description,
 			ownerName: user.name,
 			updatedAt: studySet.updatedAt,
@@ -146,11 +148,22 @@ export async function listPublicSets(query: string, limit = 50) {
 		.where(
 			and(
 				eq(studySet.visibility, 'public'),
+				lang ? eq(studySet.termLang, lang) : undefined,
 				query.trim() ? or(like(studySet.title, q), like(studySet.description, q)) : undefined
 			)
 		)
 		.orderBy(desc(studySet.updatedAt))
 		.limit(limit);
+}
+
+/** Languages that have public sets, most sets first. */
+export async function listPublicLanguages() {
+	return db
+		.select({ code: studySet.termLang, sets: count() })
+		.from(studySet)
+		.where(eq(studySet.visibility, 'public'))
+		.groupBy(studySet.termLang)
+		.orderBy(desc(count()));
 }
 
 export async function createSet(ownerId: string, input: SetInput, cards: ParsedCard[]) {

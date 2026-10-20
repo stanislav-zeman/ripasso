@@ -20,7 +20,9 @@ export const studySet = sqliteTable(
 			.references(() => user.id, { onDelete: 'cascade' }),
 		title: text('title').notNull(),
 		description: text('description').notNull().default(''),
+		/** The set's "Language": the foreign language it teaches. Terms are written in it. */
 		termLang: text('term_lang').notNull().default('it'),
+		/** The language definitions (translations) are written in. */
 		defLang: text('def_lang').notNull().default('en'),
 		visibility: text('visibility', { enum: VISIBILITIES }).notNull().default('private'),
 		createdAt: integer('created_at', { mode: 'timestamp_ms' }).default(now).notNull(),
@@ -31,7 +33,8 @@ export const studySet = sqliteTable(
 	},
 	(t) => [
 		index('study_set_owner_idx').on(t.ownerId),
-		index('study_set_visibility_idx').on(t.visibility)
+		// Explore lists public sets, optionally of one language.
+		index('study_set_visibility_lang_idx').on(t.visibility, t.termLang)
 	]
 );
 

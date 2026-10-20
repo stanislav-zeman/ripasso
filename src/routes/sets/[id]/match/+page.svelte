@@ -2,6 +2,7 @@
 	import { onDestroy } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import StudyHeader from '#lib/components/StudyHeader.svelte';
+	import { play } from '#lib/sound.svelte.ts';
 	import { shuffle } from '#lib/study/shuffle.ts';
 	import type { PageProps } from './$types';
 
@@ -76,8 +77,10 @@
 			matched.add(tile.cardId);
 			selected = null;
 			if (matched.size * 2 === tiles.length) finish();
+			else play('correct');
 		} else {
 			mismatch = [selected.key, tile.key];
+			play('wrong');
 			penalty += PENALTY_MS;
 			selected = null;
 			setTimeout(() => (mismatch = []), 450);
@@ -85,6 +88,7 @@
 	}
 
 	function finish() {
+		play('complete');
 		cancelAnimationFrame(frame);
 		finishedMs = performance.now() - startedAt;
 		const total = finishedMs + penalty;

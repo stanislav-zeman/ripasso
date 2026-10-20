@@ -2,6 +2,7 @@
 	import { tick } from 'svelte';
 	import { grade, type Verdict } from '#lib/grade.ts';
 	import { LANGUAGES } from '#lib/languages.ts';
+	import { play } from '#lib/sound.svelte.ts';
 	import AccentBar from './AccentBar.svelte';
 	import SpeakButton from './SpeakButton.svelte';
 
@@ -34,6 +35,7 @@
 		if (verdict) return finish(verdict);
 		elapsed = performance.now() - started;
 		verdict = grade(value, answer, { lang: answerLang });
+		play(verdict === 'accent' ? 'almost' : verdict);
 		if (verdict === 'correct') {
 			setTimeout(() => finish('correct'), 700);
 		} else {

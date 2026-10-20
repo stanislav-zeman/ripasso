@@ -96,8 +96,9 @@
 	}
 
 	function swapSides() {
+		// Only the text moves: this fixes lists pasted translation-first, and the set's
+		// Language stays the one it teaches.
 		cards = cards.map((c) => ({ ...c, term: c.definition, definition: c.term }));
-		[termLang, defLang] = [defLang, termLang];
 	}
 </script>
 
@@ -138,19 +139,19 @@
 		</label>
 		<div class="grid gap-4 sm:grid-cols-3">
 			<label class="block">
-				<span class="label">Term language</span>
+				<span class="label">Language</span>
 				<select class="input" name="termLang" bind:value={termLang} required>
-					<option value="" disabled>Choose…</option
+					<option value="" disabled>Language you're learning…</option
 					>{#each Object.entries(LANGUAGES) as [code, lang] (code)}<option value={code}
-							>{lang.name}</option
+							>{lang.flag} {lang.name}</option
 						>{/each}
 				</select>
 			</label>
 			<label class="block">
-				<span class="label">Definition language</span>
+				<span class="label">Translated into</span>
 				<select class="input" name="defLang" bind:value={defLang} required>
 					{#each Object.entries(LANGUAGES) as [code, lang] (code)}<option value={code}
-							>{lang.name}</option
+							>{lang.flag} {lang.name}</option
 						>{/each}
 				</select>
 			</label>
@@ -286,7 +287,7 @@
 	>
 		{#if message}<p class="mr-auto text-sm text-bad" role="alert">{message}</p>{/if}
 		<span class="text-sm text-muted">
-			{#if !termLang}Choose a term language to save{:else}{filled} complete card{filled === 1
+			{#if !termLang}Choose the set's language to save{:else}{filled} complete card{filled === 1
 					? ''
 					: 's'}{/if}
 		</span>

@@ -2,6 +2,7 @@
 	import './layout.css';
 	import favicon from '#lib/assets/favicon.svg';
 	import { page } from '$app/state';
+	import SoundControl from '#lib/components/SoundControl.svelte';
 	import type { LayoutProps } from './$types';
 
 	let { children, data }: LayoutProps = $props();
@@ -22,7 +23,7 @@
 
 <header class="border-b border-line bg-surface">
 	<nav class="mx-auto flex max-w-4xl items-center gap-1 px-4 py-3">
-		<a href="/" class="mr-3 flex items-center gap-2 text-lg font-bold">
+		<a href="/" class="mr-2 flex shrink-0 items-center gap-2 text-lg font-bold">
 			<img src={favicon} alt="" class="size-7" />
 			Ripasso
 		</a>
@@ -35,20 +36,28 @@
 						: 'text-muted hover:text-ink'}">{link.label}</a
 				>
 			{/each}
-			<div class="ml-auto flex items-center gap-2">
-				<a href="/sets/new" class="btn-primary px-3 py-1.5">+ New set</a>
+			<div class="ml-auto flex items-center gap-1 sm:gap-2">
+				<SoundControl />
+				<a href="/sets/new" class="btn-primary px-3 py-1.5 whitespace-nowrap" aria-label="New set"
+					>+<span class="hidden sm:inline"> New set</span></a
+				>
 				<form method="post" action="/logout">
-					<button class="btn-ghost px-3 py-1.5" title="Log out ({data.user.name})">Log out</button>
+					<button
+						class="btn-ghost px-2.5 py-1.5 whitespace-nowrap sm:px-3"
+						title="Log out ({data.user.name})">Log out</button
+					>
 				</form>
 			</div>
 		{:else}
 			<a
 				href="/explore"
-				class="rounded-lg px-3 py-1.5 text-sm font-medium text-muted hover:text-ink">Explore</a
+				class="hidden rounded-lg px-3 py-1.5 text-sm font-medium text-muted hover:text-ink sm:block"
+				>Explore</a
 			>
-			<div class="ml-auto flex items-center gap-2">
-				<a href="/login" class="btn-ghost px-3 py-1.5">Log in</a>
-				<a href="/signup" class="btn-primary px-3 py-1.5">Sign up</a>
+			<div class="ml-auto flex items-center gap-1 sm:gap-2">
+				<SoundControl />
+				<a href="/login" class="btn-ghost px-2.5 py-1.5 whitespace-nowrap sm:px-3">Log in</a>
+				<a href="/signup" class="btn-primary px-2.5 py-1.5 whitespace-nowrap sm:px-3">Sign up</a>
 			</div>
 		{/if}
 	</nav>

@@ -4,6 +4,7 @@
 	import StudyOptions from '#lib/components/StudyOptions.svelte';
 	import WriteQuestion from '#lib/components/WriteQuestion.svelte';
 	import type { Verdict } from '#lib/grade.ts';
+	import { play } from '#lib/sound.svelte.ts';
 	import { Rating, recordReview } from '#lib/study/api.ts';
 	import { prefs, sides } from '#lib/study/prefs.svelte.ts';
 	import { shuffle } from '#lib/study/shuffle.ts';
@@ -48,6 +49,7 @@
 		if (verdict === 'wrong') missed.push(card);
 		else correct++;
 		index++;
+		if (index === items.length) play('complete');
 	}
 </script>
 

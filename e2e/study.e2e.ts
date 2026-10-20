@@ -15,11 +15,22 @@ async function signUp(page: Page, name: string) {
 test('create a set, study it, and keep it private from others', async ({ page }) => {
 	await signUp(page, 'Anna');
 
-	// Create a set by pasting a Quizlet-style export.
-	await page.getByRole('link', { name: '+ New set' }).click();
+	// Sound effects can be muted, and the choice survives a reload.
+	const soundButton = page.getByRole('button', { name: /^Sound effects/ });
+	await soundButton.click();
+	await page.getByRole('button', { name: 'Mute' }).click();
+	await page.reload();
+	await expect(soundButton).toHaveAccessibleName('Sound effects: off');
+	await soundButton.click();
+	await page.getByRole('button', { name: 'Turn on' }).click();
+	await expect(soundButton).toHaveAccessibleName('Sound effects: 60%');
+
+	// Create a set by pasting a Quizlet-style export. Its Language is required.
+	await page.getByRole('link', { name: 'New set' }).click();
 	await page.getByLabel('Title').fill('Animales y casa');
-	await page.getByLabel('Term language').selectOption('Spanish');
-	await page.getByLabel('Definition language').selectOption('English');
+	await expect(page.getByRole('button', { name: 'Create set' })).toBeDisabled();
+	await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('es');
+	await page.getByLabel('Translated into').selectOption('en');
 	await page.getByPlaceholder(/el perro/).fill(WORDS);
 	await page.getByRole('button', { name: 'Add 5 cards' }).click();
 	await page.getByRole('button', { name: 'Create set' }).click();
@@ -71,4 +82,26 @@ test('create a set, study it, and keep it private from others', async ({ page })
 	expect(res?.status()).toBe(404);
 	const edit = await page.goto(`${setUrl}/edit`);
 	expect(edit?.status()).toBe(404);
+});
+
+test('explore public sets by language', async ({ page }) => {
+	await signUp(page, 'Clara');
+	const title = `Tiere ${Date.now()}`;
+	await page.goto('/sets/new');
+	await page.getByLabel('Title').fill(title);
+	await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('de');
+	await page.getByLabel('Visibility').selectOption('public');
+	await page.getByPlaceholder(/el perro/).fill('der Hund\tthe dog\ndie Katze\tthe cat');
+	await page.getByRole('button', { name: 'Create set' }).click();
+	await expect(page.getByText('Terms in this set')).toBeVisible();
+
+	await page.goto('/explore');
+	await page.getByRole('combobox', { name: 'Language' }).selectOption('de');
+	await expect(page).toHaveURL(/lang=de/);
+	await expect(page.getByRole('link', { name: new RegExp(title) })).toBeVisible();
+	await expect(page.getByRole('link', { name: new RegExp(title) })).toContainText('German');
+
+	// Another language doesn't list it.
+	await page.goto('/explore?lang=es');
+	await expect(page.getByText('No public sets in Spanish.')).toBeVisible();
 });

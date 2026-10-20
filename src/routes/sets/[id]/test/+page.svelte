@@ -2,6 +2,7 @@
 	import MultipleChoice from '#lib/components/MultipleChoice.svelte';
 	import StudyHeader from '#lib/components/StudyHeader.svelte';
 	import StudyOptions from '#lib/components/StudyOptions.svelte';
+	import { play } from '#lib/sound.svelte.ts';
 	import { prefs, sides } from '#lib/study/prefs.svelte.ts';
 	import { choices, shuffle } from '#lib/study/shuffle.ts';
 	import type { PageProps } from './$types';
@@ -51,6 +52,7 @@
 	function onresult(correct: boolean) {
 		if (!correct) wrong.push(current);
 		index++;
+		if (index === questions.length) play('complete');
 	}
 </script>
 

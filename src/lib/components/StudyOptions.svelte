@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { languageName } from '#lib/languages.ts';
+	import { languageLabel } from '#lib/languages.ts';
 	import { prefs, savePrefs, type Langs } from '#lib/study/prefs.svelte.ts';
 
 	interface Props {
@@ -31,9 +31,9 @@
 			<label class="block">
 				<span class="label">Answer with</span>
 				<select class="input" bind:value={prefs.answerWith} onchange={changed}>
-					<option value="term">Term{langs ? ` (${languageName(langs.termLang)})` : ''}</option>
+					<option value="term">Term{langs ? ` (${languageLabel(langs.termLang)})` : ''}</option>
 					<option value="definition"
-						>Definition{langs ? ` (${languageName(langs.defLang)})` : ''}</option
+						>Definition{langs ? ` (${languageLabel(langs.defLang)})` : ''}</option
 					>
 				</select>
 			</label>

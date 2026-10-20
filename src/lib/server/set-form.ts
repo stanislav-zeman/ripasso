@@ -39,7 +39,11 @@ export async function readSetForm(request: Request) {
 
 	if (!title) return { error: fail(400, { message: 'Please give the set a title.' }) };
 	if (!isLanguage(termLang) || !isLanguage(defLang)) {
-		return { error: fail(400, { message: 'Please choose the term and definition languages.' }) };
+		return {
+			error: fail(400, {
+				message: 'Please choose the language the set teaches and the language of its translations.'
+			})
+		};
 	}
 	if (!VISIBILITIES.includes(visibility)) {
 		return { error: fail(400, { message: 'Invalid set settings.' }) };

@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import SpeakButton from '#lib/components/SpeakButton.svelte';
 	import StarButton from '#lib/components/StarButton.svelte';
-	import { languageName } from '#lib/languages.ts';
+	import { languageLabel } from '#lib/languages.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -40,7 +40,9 @@
 		</div>
 		{#if data.set.description}<p class="mt-2 text-muted">{data.set.description}</p>{/if}
 		<p class="mt-2 text-sm text-muted">
-			{cards.length} cards · {languageName(data.set.termLang)} → {languageName(data.set.defLang)}
+			{cards.length} card{cards.length === 1 ? '' : 's'} · {languageLabel(data.set.termLang)} → {languageLabel(
+				data.set.defLang
+			)}
 			{#if !data.isOwner}· by {data.ownerName}{/if}
 		</p>
 	</div>

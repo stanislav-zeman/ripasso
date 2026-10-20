@@ -4,6 +4,7 @@
 	import WriteQuestion from './WriteQuestion.svelte';
 	import SpeakButton from './SpeakButton.svelte';
 	import type { Verdict } from '#lib/grade.ts';
+	import { play } from '#lib/sound.svelte.ts';
 	import { recordReview } from '#lib/study/api.ts';
 	import {
 		initialQueue,
@@ -56,6 +57,7 @@
 		} else {
 			finished.push(item);
 			next(queue.slice(1));
+			if (!queue.length) play('complete');
 		}
 	}
 </script>

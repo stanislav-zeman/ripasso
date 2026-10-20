@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { play } from '#lib/sound.svelte.ts';
 	import SpeakButton from './SpeakButton.svelte';
 
 	interface Props {
@@ -16,6 +17,7 @@
 		if (picked !== null) return;
 		picked = option;
 		const correct = option === answer;
+		play(correct ? 'correct' : 'wrong');
 		setTimeout(() => onresult(correct), correct ? 600 : 1500);
 	}
 

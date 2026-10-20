@@ -1,5 +1,7 @@
 export interface Language {
 	name: string;
+	/** Emoji flag of a country where it's spoken, to make languages easy to spot. */
+	flag: string;
 	/** BCP 47 locale used to pick a text-to-speech voice. */
 	locale: string;
 	/** Characters offered as buttons when typing answers in this language. */
@@ -9,53 +11,61 @@ export interface Language {
 }
 
 export const LANGUAGES: Record<string, Language> = {
-	zh: { name: 'Chinese', locale: 'zh-CN' },
+	zh: { name: 'Chinese', flag: '🇨🇳', locale: 'zh-CN' },
 	cs: {
 		name: 'Czech',
+		flag: '🇨🇿',
 		locale: 'cs-CZ',
 		specialChars: ['á', 'č', 'ď', 'é', 'ě', 'í', 'ň', 'ó', 'ř', 'š', 'ť', 'ú', 'ů', 'ý', 'ž']
 	},
 	nl: {
 		name: 'Dutch',
+		flag: '🇳🇱',
 		locale: 'nl-NL',
 		specialChars: ['é', 'ë', 'ï', 'ö', 'ü'],
 		articles: ['de', 'het', 'een']
 	},
-	en: { name: 'English', locale: 'en-US', articles: ['the', 'a', 'an'] },
+	en: { name: 'English', flag: '🇬🇧', locale: 'en-US', articles: ['the', 'a', 'an'] },
 	fr: {
 		name: 'French',
+		flag: '🇫🇷',
 		locale: 'fr-FR',
 		specialChars: ['à', 'â', 'ç', 'é', 'è', 'ê', 'ë', 'î', 'ï', 'ô', 'ù', 'û', 'ü', 'œ'],
 		articles: ['le', 'la', 'les', "l'", 'un', 'une', 'des', 'du']
 	},
 	de: {
 		name: 'German',
+		flag: '🇩🇪',
 		locale: 'de-DE',
 		specialChars: ['ä', 'ö', 'ü', 'ß'],
 		articles: ['der', 'die', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'einen', 'einem', 'einer']
 	},
 	it: {
 		name: 'Italian',
+		flag: '🇮🇹',
 		locale: 'it-IT',
 		specialChars: ['à', 'è', 'é', 'ì', 'ò', 'ù'],
 		articles: ['il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', "l'", "un'"]
 	},
-	ja: { name: 'Japanese', locale: 'ja-JP' },
-	ko: { name: 'Korean', locale: 'ko-KR' },
+	ja: { name: 'Japanese', flag: '🇯🇵', locale: 'ja-JP' },
+	ko: { name: 'Korean', flag: '🇰🇷', locale: 'ko-KR' },
 	pl: {
 		name: 'Polish',
+		flag: '🇵🇱',
 		locale: 'pl-PL',
 		specialChars: ['ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ź', 'ż']
 	},
 	pt: {
 		name: 'Portuguese',
+		flag: '🇵🇹',
 		locale: 'pt-PT',
 		specialChars: ['á', 'â', 'ã', 'à', 'ç', 'é', 'ê', 'í', 'ó', 'ô', 'õ', 'ú'],
 		articles: ['o', 'a', 'os', 'as', 'um', 'uma']
 	},
-	ru: { name: 'Russian', locale: 'ru-RU' },
+	ru: { name: 'Russian', flag: '🇷🇺', locale: 'ru-RU' },
 	sk: {
 		name: 'Slovak',
+		flag: '🇸🇰',
 		locale: 'sk-SK',
 		specialChars: [
 			'á',
@@ -79,14 +89,26 @@ export const LANGUAGES: Record<string, Language> = {
 	},
 	es: {
 		name: 'Spanish',
+		flag: '🇪🇸',
 		locale: 'es-ES',
 		specialChars: ['á', 'é', 'í', 'ñ', 'ó', 'ú', 'ü', '¿', '¡'],
 		articles: ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas']
 	},
-	sv: { name: 'Swedish', locale: 'sv-SE', specialChars: ['å', 'ä', 'ö'], articles: ['en', 'ett'] },
-	uk: { name: 'Ukrainian', locale: 'uk-UA' }
+	sv: {
+		name: 'Swedish',
+		flag: '🇸🇪',
+		locale: 'sv-SE',
+		specialChars: ['å', 'ä', 'ö'],
+		articles: ['en', 'ett']
+	},
+	uk: { name: 'Ukrainian', flag: '🇺🇦', locale: 'uk-UA' }
 };
 
 export const isLanguage = (code: string) => Object.hasOwn(LANGUAGES, code);
 
 export const languageName = (code: string) => LANGUAGES[code]?.name ?? code;
+
+export const languageFlag = (code: string) => LANGUAGES[code]?.flag ?? '🌐';
+
+/** Name with its flag, e.g. "🇮🇹 Italian". */
+export const languageLabel = (code: string) => `${languageFlag(code)} ${languageName(code)}`;

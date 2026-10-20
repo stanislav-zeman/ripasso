@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { languageFlag, languageName } from '#lib/languages.ts';
+
 	interface Props {
 		set: {
 			id: string;
 			title: string;
+			termLang: string;
 			description: string;
 			cards: number;
 			ownerName?: string;
@@ -23,6 +26,13 @@
 		<h3 class="flex-1 font-semibold">{set.title}</h3>
 		{#if set.due}<span class="chip shrink-0">{set.due} due</span>{/if}
 	</div>
+	<p>
+		<span
+			class="inline-flex items-center gap-1.5 rounded-full bg-bg py-0.5 pr-2.5 pl-1.5 text-xs font-medium ring-1 ring-line"
+			><span class="text-base leading-none" aria-hidden="true">{languageFlag(set.termLang)}</span
+			>{languageName(set.termLang)}</span
+		>
+	</p>
 	{#if set.description}<p class="line-clamp-2 text-sm text-muted">{set.description}</p>{/if}
 	<p class="mt-auto text-xs text-muted">
 		{set.cards} card{set.cards === 1 ? '' : 's'}
